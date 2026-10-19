@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulateur de Rentabilité LEASEIR</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --card-bg: #ffffff;
+      --text-main: #1d1d1f;
+      --text-muted: #86868b;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --border: #e5e5ea;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 34px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 17px;
+      color: var(--text-muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    @media (min-width: 900px) {
+      .grid {
+        grid-template-columns: 340px 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi {
+      background: #fbfbfd;
+      border: 1px solid var(--border);
+      padding: 20px;
+      border-radius: 14px;
+      text-align: center;
+    }
+
+    .kpi-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .kpi-value.highlight {
+      color: #34c759;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fbfbfd;
+      font-size: 15px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent);
+      background: #fff;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      padding: 12px 10px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #f2f2f7;
+    }
+
+    tr.category-row td {
+      background: #fbfbfd;
+      font-weight: 600;
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    input.table-input {
+      width: 70px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .badge-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: #f2f2f7;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Simulateur Rentabilité LEASEIR</h1>
+    <p>Calculez dynamiquement vos revenus et votre retour sur investissement</p>
+  </header>
+
+  <div class="grid">
+    <!-- Panneau de Financement & KPI -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      <div class="card">
+        <h2 style="font-size: 18px; margin-bottom: 20px; font-weight: 600;">Financement Machine</h2>
+        <div class="form-group">
+          <label>Prix Equipement LEASEIR (€ HT)</label>
+          <input type="number" id="prixEquipement" value="34000" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Loyer Mensuel HT (€)</label>
+          <input type="number" id="loyerMensuel" value="927.36" oninput="calculate()">
+        </div>
+        <div class="form-group">
+          <label>Durée du Financement (Mois)</label>
+          <input type="number" id="dureeMois" value="60" oninput="calculate()">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="font-size: 18px; margin-bottom: 20px; font-weight: 600;">Résultats Estimés</h2>
+        <div class="kpi-container">
+          <div class="kpi">
+            <div class="kpi-title">Patients / Mois</div>
+            <div class="kpi-value" id="totalPatients">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-title">Revenu Brut / M</div>
+            <div class="kpi-value" id="revenuBrut">0 €</div>
+          </div>
+        </div>
+        <div class="kpi" style="margin-bottom: 16px;">
+          <div class="kpi-title">Bénéfice Net Mensuel</div>
+          <div class="kpi-value highlight" id="beneficeNet">0 €</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">Revenu Traitement Complet</div>
+          <div class="kpi-value" id="revenuComplet">0 €</div>
+        </div>
+
+        <div class="badge-container">
+          <span class="badge">✓ Certifié CE</span>
+          <span class="badge">✓ Enregistré EUDAMED</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table de simulation dynamique -->
+    <div class="card">
+      <h2 style="font-size: 18px; margin-bottom: 16px; font-weight: 600;">Zones & Tarifications</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Zone</th>
+              <th>Prix / Séance (€)</th>
+              <th>Patients / M</th>
+              <th>Revenu / M (€)</th>
+            </tr>
+          </thead>
+          <tbody id="zoneTableBody">
+            <!-- Injecté par JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const zonesData = [
+    { category: "FEMMES" },
+    { name: "Aisselles", prix: 90, patients: 6 },
+    { name: "Sourcils", prix: 60, patients: 6 },
+    { name: "Jambes", prix: 199, patients: 6 },
+    { name: "Jambes et cuisses", prix: 320, patients: 6 },
+    { name: "Avant-bras", prix: 150, patients: 6 },
+    { name: "Bras complets", prix: 260, patients: 6 },
+    { name: "Abdomen", prix: 140, patients: 6 },
+    { name: "Ligne blanche", prix: 80, patients: 6 },
+    { name: "Aréoles", prix: 80, patients: 6 },
+    { name: "Sillon Interfessier", prix: 100, patients: 6 },
+    { name: "Maillot standard", prix: 130, patients: 6 },
+    { name: "Maillot intégral", prix: 195, patients: 6 },
+    { name: "Maillot dessiné", prix: 170, patients: 6 },
+    { name: "Lèvre supérieure", prix: 70, patients: 6 },
+    { name: "Duvet 'Full face'", prix: 150, patients: 6 },
+
+    { category: "HOMMES" },
+    { name: "Torse + Abdomen", prix: 390, patients: 4 },
+    { name: "Abdomen seul", prix: 210, patients: 4 },
+    { name: "Dos complet", prix: 380, patients: 4 },
+    { name: "Épaules seules", prix: 210, patients: 4 },
+    { name: "Jambes complètes", prix: 320, patients: 4 },
+    { name: "Torse", prix: 250, patients: 4 },
+    { name: "Zone lombaire seule", prix: 180, patients: 4 },
+    { name: "Nuque", prix: 100, patients: 4 },
+    { name: "Barbe (Poils incarnés)", prix: 130, patients: 4 }
+  ];
+
+  function initTable() {
+    const tbody = document.getElementById("zoneTableBody");
+    tbody.innerHTML = "";
+
+    zonesData.forEach((item, index) => {
+      if (item.category) {
+        const tr = document.createElement("tr");
+        tr.className = "category-row";
+        tr.innerHTML = `<td colspan="4">${item.category}</td>`;
+        tbody.appendChild(tr);
+      } else {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td><input type="number" class="table-input" id="prix_${index}" value="${item.prix}" oninput="calculate()"></td>
+          <td><input type="number" class="table-input" id="pat_${index}" value="${item.patients}" oninput="calculate()"></td>
+          <td style="font-weight: 600;" id="rev_${index}">0 €</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+    calculate();
+  }
+
+  function calculate() {
+    let totalPatients = 0;
+    let totalRevenuBrut = 0;
+
+    zonesData.forEach((item, index) => {
+      if (!item.category) {
+        const prix = parseFloat(document.getElementById(`prix_${index}`).value) || 0;
+        const patients = parseFloat(document.getElementById(`pat_${index}`).value) || 0;
+        
+        const revenuMensuel = prix * patients;
+        document.getElementById(`rev_${index}`).innerText = `${revenuMensuel.toLocaleString('fr-FR')} €`;
+
+        totalPatients += patients;
+        totalRevenuBrut += revenuMensuel;
+      }
+    });
+
+    const loyer = parseFloat(document.getElementById("loyerMensuel").value) || 0;
+    const beneficeNet = totalRevenuBrut - loyer;
+    const revenuComplet = totalRevenuBrut * 7; // Estimation moyenne sur traitement complet
+
+    document.getElementById("totalPatients").innerText = totalPatients;
+    document.getElementById("revenuBrut").innerText = `${totalRevenuBrut.toLocaleString('fr-FR')} €`;
+    document.getElementById("beneficeNet").innerText = `${beneficeNet.toLocaleString('fr-FR')} €`;
+    document.getElementById("revenuComplet").innerText = `${revenuComplet.toLocaleString('fr-FR')} €`;
+  }
+
+  window.onload = initTable;
+</script>
+
+</body>
+</html>
